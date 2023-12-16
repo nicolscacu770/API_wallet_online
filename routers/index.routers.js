@@ -5,7 +5,7 @@ const usuarios = require('./users.router');
 //function routers
 function router(app) {
     const router = express.Router();
-    app.use('/', router);
+    app.use('/api', router);
     router.use('/movimientos', movimientos);
     router.use('/usuarios', usuarios);
 

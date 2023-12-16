@@ -1,4 +1,4 @@
-const { findAll, findById, save, update, deletear } = require('./../services-controllers/wallet.services');
+const { findAll, findById, save, update, deletear } = require('./../services/users.services');
 const express = require('express');
 
 const router = express.Router();
@@ -9,5 +9,5 @@ router.get('/:id', findById);
 router.post('/', save);
 router.patch('/:id', update);
 router.delete('/:id', deletear);
-
+    
 module.exports = router;

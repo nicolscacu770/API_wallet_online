@@ -13,7 +13,7 @@ const schemaMovimiento = new Schema( {
         required : true,
         unique : true
     },
-    decripcion : {
+    descripcion : {
         type : String,
         required : false,
         unique : false
@@ -37,6 +37,11 @@ const schemaMovimiento = new Schema( {
         type : String,
         required : true,
         unique : false
+    },
+
+    usuario : {
+        type : Schema.Types.ObjectId,
+        ref : 'usuario'
     }
 })
 

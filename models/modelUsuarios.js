@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const {Schema} = mongoose;
 
-const schemaCliente = new Schema( {
+const schemaUsuario = new Schema( {
     id : {
         type : Number,
         required : true,
@@ -37,4 +37,4 @@ const schemaCliente = new Schema( {
     ]
 })
 
-module.exports = mongoose.model('cliente', schemaCliente);
+module.exports = mongoose.model('usuario', schemaUsuario);

@@ -1,20 +1,22 @@
-const data = fs.readFileSync('data.json');
-let datos = JSON.parse(data);
+const modelMovimientos = require('../models/modelMovimientos');
+const movementModel = require('../models/modelMovimientos');
+const usuarioModel = require('../models/modelUsuarios');
 
 module.exports = {
     findAll : async(req,res) => {
         try {
-            return res.status(200).json({"state": true, "data": datos});
+            const movimientos = await movementModel.find({});
+
+            return res.status(200).json({state: true, msg: "Recuperar Todos los registros", "data": movimientos});
         } catch (error) {
             return res.status(500).json({"state": false, "error": error});
         }
     },
 
-    findById : (req,res) => {
+    findById : async(req,res) => {
         const {id} = req.params;
         try {
-            const [movement] = datos.movimientos.filter( element => element.id == id );
-
+            const movement = await movementModel.findById(id);
             if(movement){
                 return res.status(200).json({"state": true, "data": movement});    
             }else{
@@ -27,30 +29,30 @@ module.exports = {
     },
 
     save : async(req,res) => {
-        console.log(req.body);
-        let dateAct = new Date();
-        const dia = dateAct.getDate();
-        const mes = dateAct.getMonth() + 1;
-        const año = dateAct.getFullYear();
-        const hora = dateAct.getHours();
-        const minutos = dateAct.getMinutes();
-        const segundos = dateAct.getSeconds();
+        const {idUser} = req.params;
+        const usuario = await usuarioModel.findById(idUser);
 
-        const fechaHoy = `${dia}/${mes}/${año}`
-        const horaActual = `${hora}:${minutos}:${segundos}`;
-            
-        const {id, name, description, type, value} = req.body
-        const data = {"id": id, "nombre": name, "descripcion": description, "tipo": type, "valor": value, "fecha": fechaHoy, "hora": horaActual}
+        if( usuario ){
+            const {id, nombre, descripcion, tipo, valor} = req.body
+            const data = {"id": id, "nombre": nombre, "descripcion": descripcion, "tipo": tipo, "valor": valor, "fecha": getFecha(), "hora": getHora()}
 
-        try {
-            datos.movimientos.push(data);
-            let datosJSON = JSON.stringify(datos);
-            fs.writeFileSync('data.json', datosJSON);
-            
-            return res.status(200).json({"state": true, "data":data});
-        } catch (error) {
-            return res.status(500).json({"state": false, "error": "no available :v"});
+            try {
+                const movimiento = new modelMovimientos(data);
+                movimiento.usuario = usuario;
+                const movimientoGuardado = await movimiento.save();
+
+                usuario.movimientos.push(movimiento);
+                await usuario.save();
+                
+                return res.status(200).json({"state": true, "data":movimientoGuardado});
+            } catch (error) {
+                console.log(error.message);
+                return res.status(500).json({"state": false, "error": "no available :v"});
+            }
+        }else{
+
         }
+        
     },
 
     update : async(req,res) => {
@@ -73,8 +75,7 @@ module.exports = {
             }
 
             if(founded){
-                let datosJSON = JSON.stringify(datos);
-                fs.writeFileSync('data.json', datosJSON);
+                
                 return res.status(200).json({"state": true, "msg": "elemento actualizado correctamente", "data": data});    
             }else{
                 return res.status(404).json({"state": false, "msg": "elemento no encontrado"});
@@ -106,4 +107,22 @@ module.exports = {
             return res.status(500).json({"state": false, "error": "no available :v"});
         }
     }
+}
+
+function getFecha() {
+    let dateAct = new Date();
+    const dia = dateAct.getDate();
+    const mes = dateAct.getMonth() + 1;
+    const año = dateAct.getFullYear();
+
+    return `${dia}/${mes}/${año}`;
+}
+
+function getHora() {
+    const dateAct = new Date();
+    const hora = dateAct.getHours();
+    const minutos = dateAct.getMinutes();
+    const segundos = dateAct.getSeconds();
+
+    return  `${hora}:${minutos}:${segundos}`;
 }
